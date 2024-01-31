@@ -25,7 +25,7 @@ To get a local copy of the project up and running on your machine, follow these 
 git clone https://github.com/Aeronaul/FluidWriter.git
 ```
 2. On Windows, double click ```run.bat```.
-3. On Linux, run the following commands:
+3. On Linux/MacOS, run the following commands:
 ```
 cd FluidWriter/src
 ```
