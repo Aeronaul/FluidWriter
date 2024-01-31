@@ -5,6 +5,8 @@ let currentImageIndex = -1;
 let currentAudioIndex = -1;
 let saved = true;
 
+localStorage.clear();
+
 let quill = new Quill("#quillEditor", {
   modules: {
     toolbar: "#ql-toolbar",
@@ -48,7 +50,7 @@ let myDropzone = new Dropzone("#outer-layout", {
   maxFilesize: 50, // MB
   acceptedFiles: "image/*,audio/*,video/*",
   renameFile: (file) => {
-    if (file.type.match("(audio|video)/.*|")) {
+    if (file.type.match("(audio|video)/.*")) {
       return `${audioIndex}.${file.name.split(".").slice(-1)}`;
     } else {
       return `${imageIndex}.${file.name.split(".").slice(-1)}`;
@@ -107,9 +109,7 @@ function loadCg(url) {
       document.getElementById("cg-canvas").height
     );
     resetPosition();
-    setTimeout(() => {
-      document.getElementById("cg-background").style = Gradient(image);
-    }, 0);
+    document.getElementById("cg-background").style = Gradient(image);
 
     dragResetThreshold = Math.min(image.height, image.width) * dpRatio;
     if (currentImageIndex === -1) {
@@ -118,12 +118,6 @@ function loadCg(url) {
       document.getElementById("cg-canvas").classList.remove("hide");
     }
   };
-}
-
-customDefaultImgForGradient ? loadCg(customDefaultImgForGradient) : setDefaultBg();
-
-function setDefaultBg() {
-  document.getElementById("cg-background").style = defaultBgGradient;
 }
 
 function loadCgIndex(index) {
@@ -166,6 +160,14 @@ document.getElementById("cg-canvas").addEventListener("wheel", (event) => {
   const scale = event.deltaY > 0 ? 0.9 : 1.1;
   zoom(scale);
 });
+
+customDefaultImgForGradient ? loadCg(customDefaultImgForGradient) : setDefaultBg();
+
+function setDefaultBg() {
+  image.src = '';
+  redraw()
+  document.getElementById("cg-background").style = defaultBgGradient;
+}
 
 function resetSize() {
   document.getElementById("cg-canvas").width = image.width;
@@ -401,8 +403,10 @@ function getLastImageKeyboard() {
 
   if (imgElement) {
     const i = imgElement.innerHTML.substring("4");
-    currentImageIndex = i;
-    loadCgIndex(i);
+    if (currentImageIndex != i) {
+      currentImageIndex = i;
+      loadCgIndex(i);
+    }
   } else {
     currentImageIndex = -1;
     customDefaultImgForGradient ? loadCg(customDefaultImgForGradient) : setDefaultBg();

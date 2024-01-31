@@ -1,12 +1,16 @@
 <?php
 $_SESSION["story"] = $_GET['story'];
-$uploaddir = getcwd() . '/content/' . $_SESSION["story"];
-if (!is_dir($uploaddir)) {
-    mkdir($uploaddir);
-    mkdir($uploaddir . '/img/');
-    mkdir($uploaddir . '/aud/');
+$content_dir = getcwd() . '/content/';
+if (!is_dir($content_dir)) {
+    mkdir($content_dir);
 }
-$uploadfile = $uploaddir . '/script.fld';
-$file_content = file_get_contents($uploadfile);
+$upload_dir = $content_dir . $_SESSION["story"];
+if (!is_dir($upload_dir)) {
+    mkdir($upload_dir);
+    mkdir($upload_dir . '/img/');
+    mkdir($upload_dir . '/aud/');
+}
+$upload_file = $upload_dir . '/script.fld';
+$file_content = file_get_contents($upload_file);
 echo json_encode($file_content);
 ?>
