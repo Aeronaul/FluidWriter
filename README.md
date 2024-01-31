@@ -45,7 +45,7 @@ Alternatively, you can also run the shell script:
 - These files are renamed to a numeric index value, which you can find in the ```content/(your-story)/``` folder
 - Scroll on the image in the left pane to zoom on it.
 - Double click on the text editor on the right to enter read-only mode, which also emphasises the text under the cursor, fading the rest.
-- The image which is directly above your text cursor in edit mode, or above your mouse cursor in read-only mode will be displayed.
+- The image, which is directly above your text cursor in edit mode, or above your mouse cursor in read-only mode, will be displayed.
 - Audio playback works in a similar fashion.
 
 ## Acknowledgements
