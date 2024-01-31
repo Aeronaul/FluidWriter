@@ -44,6 +44,7 @@ cd FluidWriter/src
 - Audio playback works in a similar fashion.
 
 ## Acknowledgements
+Following libraries were used in the making of this web app. The latter two were modified as per requirement.
 - Quill
 - Grade.js
 - TinyZoom.js
