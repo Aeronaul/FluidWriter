@@ -2,7 +2,7 @@
 A simple text editor with a clean interface for a distraction-free experience while writing.
 
 ## Screenshot
-![FluidWriter screenshot](screenshot.jpg?raw=true)
+![FluidWriter screenshot](screenshot.png?raw=true)
 
 ## Features
 - Supports image and audio uploads.
