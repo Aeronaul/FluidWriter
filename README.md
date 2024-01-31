@@ -8,7 +8,7 @@ A simple text editor with a clean interface for a distraction-free experience wh
 - Supports image and audio uploads.
 - Every story is contained in its own folder with its own media.
 - The text file is saved as HTML to preserve formatting.
-- Only supports bold and italic formatting.
+- Supports bold and italic formatting.
 - Simple and self-contained web app.
 
 ## Getting Started
