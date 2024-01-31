@@ -32,7 +32,7 @@ cd FluidWriter/src
 ```
 php -S localhost:5500 -c .
 ```
-Alternatively, you can also run the shell script.
+Alternatively, you can also run the shell script:
 ```
 ./run.sh
 ```
