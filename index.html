@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FW Index</title>
+    <style>
+      body {
+        background-color: black;
+        color: white;
+        height: 100vh;
+        padding: 1rem;
+        font-size: 1.5rem;
+      }
+
+      #container {
+        text-align: center;
+      }
+
+      #new-btn {
+        margin-bottom: 2rem;
+      }
+
+      #story-list a {
+        position: relative;
+        margin-block: 1rem;
+      }
+
+      .menu-btn {
+        background-color: black;
+        border: 1px solid white;
+        color: white;
+        padding: 0.5rem;
+        font-size: 1.2rem;
+      }
+
+      .menu-btn:hover {
+        background-color: #babe69;
+        color: black;
+        cursor: pointer;
+      }
+
+      a:link, a:visited {
+        color: #bebebe;
+        background-color: transparent;
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: #babe69;
+        background-color: transparent;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <button id="new-btn" class="menu-btn" onclick="newStory()">New</button>
+      <div id="story-list"></div>
+    </div>
+
+    <script>
+      const sList = document.getElementById("story-list");
+      fetch("data.php")
+        .then((res) => res.json())
+        .then((data) => {
+          data.forEach((d) => {
+            var anchor = document.createElement("a");
+            anchor.href = "writer.html";
+            const fileName = d.split("/").splice(-1);
+            anchor.innerText = fileName;
+            anchor.onclick = () => {
+              sessionStorage.setItem("current-story", anchor.innerText);
+            };
+            sList.appendChild(anchor);
+            sList.appendChild(document.createElement("br"));
+            sList.appendChild(document.createElement("br"));
+          });
+        });
+
+      function newStory() {
+        const newStoryName = prompt("Enter name of the story:");
+        if (newStoryName) {
+            sessionStorage.setItem("current-story", newStoryName);
+            window.location.href = "writer.html";
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fluid Writer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div id="outer-layout" enctype="multipart/form-data">
+      <section id="image-section" class="half-container">
+        <canvas id="temp-cg-canvas" class="hide"></canvas>
+        <canvas id="cg-canvas" class="hide"></canvas>
+        <img id="cg-background" />
+      </section>
+      <section id="text-section" class="half-container">
+        <div id="ql-container" class="ql-container-inactive">
+          <div id="ql-toolbar">
+            <button class="ql-bold ql-btn">B</button>
+            <button class="ql-italic ql-btn">I</button>
+            <button class="ql-btn save-btn-disabled" id="save-btn">Save</button>
+            <button class="ql-btn" id="close-btn">Close</button>
+          </div>
+        <div id="quillEditor" class="hide-cursor"></div>
+      </div>
+      </section>
+    </div>
+    <script src="scripts/dropzone-min.js"></script>
+    <link href="scripts/dropzone.css" rel="stylesheet" type="text/css" />
+    <script src="scripts/gradient.js"></script>
+    <link rel="stylesheet" href="scripts/quill.snow.css" />
+    <link rel="stylesheet" href="scripts/quill.core.css" />
+    <script src="scripts/quill.min.js"></script>
+    <script type="text/javascript" src="scripts/main.js"></script>
+  </body>
+</html>
