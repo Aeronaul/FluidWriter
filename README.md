@@ -6,6 +6,7 @@ A simple text editor with a clean interface for a distraction-free experience wh
 
 ## Features
 - Supports image and audio uploads.
+- Generates a gradient from the uploaded image in the background.
 - Every story is contained in its own folder with its own media.
 - The text is saved as HTML to preserve formatting.
 - Supports bold and italic formatting.
