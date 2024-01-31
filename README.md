@@ -1,4 +1,4 @@
-# FluidWriter (Javascript)
+# FluidWriter
 A simple text editor with a clean interface for a distraction-free experience while writing.
 
 ## Screenshot
