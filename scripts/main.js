@@ -4,6 +4,7 @@ const defaultBgGradient = "background-image: linear-gradient(135deg, rgb(101, 15
 let currentImageIndex = -1;
 let currentAudioIndex = -1;
 let saved = true;
+let audioVolume = 0.1;
 
 localStorage.clear();
 
@@ -309,7 +310,7 @@ document.querySelector(".ql-editor").onscroll = (e) => {
 document.querySelector(".ql-editor").onmousemove = (e) => {
   if (!editorEnabled) {
     const lastImageIndex = getLastImageMouse(e.clientY);
-    const lastAudioIndex = getLastAudioMouse(e.clientY);
+    const lastAudioInfo = getLastAudioMouse(e.clientY);
     if (lastImageIndex > 0 && lastImageIndex != currentImageIndex) {
       currentImageIndex = lastImageIndex;
       loadCgIndex(currentImageIndex);
@@ -318,15 +319,20 @@ document.querySelector(".ql-editor").onmousemove = (e) => {
       customDefaultImgForGradient ? loadCg(customDefaultImgForGradient) : setDefaultBg();
     }
 
-    if (lastAudioIndex == currentAudioIndex) return;
-    if (lastAudioIndex > 0 && lastAudioIndex != currentAudioIndex) {
+    if (lastAudioInfo.length > 2 && lastAudioInfo[2] && audioVolume != (parseFloat(lastAudioInfo[2])%100)/100) {
+      audioVolume = (parseFloat(lastAudioInfo[2])%100)/100
+      audio.volume = audioVolume; 
+    }
+    if (lastAudioInfo[1] == currentAudioIndex) return;
+    if (lastAudioInfo.length > 0 && lastAudioInfo[1] != currentAudioIndex) {
       if (audio) audio.pause();
-      currentAudioIndex = lastAudioIndex;
-      audio = new Audio(`media.php?type=aud&name=${lastAudioIndex}`);
+      currentAudioIndex = lastAudioInfo[1];
+      audio = new Audio(`media.php?type=aud&name=${lastAudioInfo[1]}`);
       audio.loop = true;
+      audio.volume = audioVolume;
       audio.play();
-    } else if (lastAudioIndex === -1) {
-      currentAudioIndex = lastAudioIndex;
+    } else if (lastAudioInfo === -1) {
+      currentAudioIndex = lastAudioInfo[1];
       audio.pause();
     }
   }
@@ -374,8 +380,13 @@ function getLastAudioMouse(mouseY) {
     )
       audElement = el;
   }
-  if (audElement) return audElement.innerHTML.substring("4");
-  else return -1;
+  if (audElement) {
+    const audioInfo = audElement.innerHTML.split(":")
+    // if (audioInfo.length > 2)
+      // audioVolume = (parseFloat(audioInfo[2])%10)/10;
+    return audioInfo;
+  }
+  else return [];
 }
 
 function getLastImageKeyboard() {
@@ -415,11 +426,21 @@ function getLastImageKeyboard() {
   decorateMediaHolders();
 
   if (audElement) {
-    let aIndex = audElement.innerHTML.substring("4");
-    if (aIndex == currentAudioIndex) return;
+    const audioInfo = audElement.innerHTML.split(":")
+    const aIndex = audioInfo[1];
+    if (aIndex == currentAudioIndex) {
+      if (audioInfo.length > 2 && audioInfo[2] && audioVolume != (parseFloat(audioInfo[2])%100)/100) {
+        audioVolume = (parseFloat(audioInfo[2])%100)/100
+        audio.volume = audioVolume;
+      }
+      return;
+    }
+    if (audioInfo.length > 2)
+      audioVolume = (parseFloat(audioInfo[2])%100)/100;
     currentAudioIndex = aIndex;
     if (audio) audio.pause();
     audio = new Audio(`media.php?type=aud&name=${aIndex}`);
+    audio.volume = audioVolume;
     audio.loop = true;
     audio.play();
   } else {
