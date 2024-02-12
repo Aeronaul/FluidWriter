@@ -14,6 +14,8 @@ let quill = new Quill("#quillEditor", {
   },
 });
 
+quill.root.setAttribute('spellcheck', false)
+
 let imageIndex = 1;
 let audioIndex = 1;
 let audio;
