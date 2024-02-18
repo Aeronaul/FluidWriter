@@ -275,17 +275,19 @@ window.onresize = () => {
   }, 200);
 };
 
-document.getElementById("quillEditor").ondblclick = (e) => {
-  window.getSelection().empty();
-  document.getElementById("quillEditor").classList.add("hide-cursor");
-  editorEnabled = false;
-  quill.enable(false);
-  document
-    .getElementById("ql-container")
-    .classList.remove("ql-container-active");
-  document
-    .getElementById("ql-container")
-    .classList.add("ql-container-inactive");
+document.getElementById("quillEditor").onkeydown = (e) => {
+  if(e.key === "Escape") { 
+    window.getSelection().empty();
+    document.getElementById("quillEditor").classList.add("hide-cursor");
+    editorEnabled = false;
+    quill.enable(false);
+    document
+      .getElementById("ql-container")
+      .classList.remove("ql-container-active");
+    document
+      .getElementById("ql-container")
+      .classList.add("ql-container-inactive");
+  }
 };
 
 document.getElementById("quillEditor").onmousedown = (e) => {
