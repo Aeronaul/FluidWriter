@@ -1,10 +1,14 @@
 const customDefaultImgForGradient = ""; // Set your default background image URL here
-const defaultBgGradient = "background-image: linear-gradient(135deg, rgb(101, 158, 54) 0%, rgb(44, 55, 139) 75%); color: rgb(255, 255, 255);";
+const defaultBgGradient =
+  "background-image: linear-gradient(135deg, rgb(101, 158, 54) 0%, rgb(44, 55, 139) 75%); color: rgb(255, 255, 255);";
 // const defaultBg = "background-image: linear-gradient(135deg, rgb(131, 178, 204) 0%, rgb(124, 55, 39) 75%); color: rgb(255, 255, 255);";
 let currentImageIndex = -1;
 let currentAudioIndex = -1;
 let saved = true;
 let audioVolume = 0.1;
+let isBold = false;
+let isItalic = false;
+let isMute = false;
 
 localStorage.clear();
 
@@ -14,7 +18,7 @@ let quill = new Quill("#quillEditor", {
   },
 });
 
-quill.root.setAttribute('spellcheck', false)
+quill.root.setAttribute("spellcheck", false);
 
 let imageIndex = 1;
 let audioIndex = 1;
@@ -164,11 +168,13 @@ document.getElementById("cg-canvas").addEventListener("wheel", (event) => {
   zoom(scale);
 });
 
-customDefaultImgForGradient ? loadCg(customDefaultImgForGradient) : setDefaultBg();
+customDefaultImgForGradient
+  ? loadCg(customDefaultImgForGradient)
+  : setDefaultBg();
 
 function setDefaultBg() {
-  image.src = '';
-  redraw()
+  image.src = "";
+  redraw();
   document.getElementById("cg-background").style = defaultBgGradient;
 }
 
@@ -276,7 +282,7 @@ window.onresize = () => {
 };
 
 document.getElementById("quillEditor").onkeydown = (e) => {
-  if(e.key === "Escape") { 
+  if (e.key === "Escape") {
     window.getSelection().empty();
     document.getElementById("quillEditor").classList.add("hide-cursor");
     editorEnabled = false;
@@ -287,6 +293,17 @@ document.getElementById("quillEditor").onkeydown = (e) => {
     document
       .getElementById("ql-container")
       .classList.add("ql-container-inactive");
+  } else if (e.ctrlKey && e.key === "s") {
+    e.preventDefault();
+    document.getElementById("save-btn").click();
+  } else if (e.ctrlKey && e.key === "b") {
+    e.preventDefault();
+    isBold = !isBold;
+    quill.format("bold", isBold);
+  } else if (e.ctrlKey && e.key === "i") {
+    e.preventDefault();
+    isItalic = !isItalic;
+    quill.format("italic", isItalic);
   }
 };
 
@@ -320,12 +337,18 @@ document.querySelector(".ql-editor").onmousemove = (e) => {
       loadCgIndex(currentImageIndex);
     } else if (lastImageIndex === -1) {
       currentImageIndex = lastImageIndex;
-      customDefaultImgForGradient ? loadCg(customDefaultImgForGradient) : setDefaultBg();
+      customDefaultImgForGradient
+        ? loadCg(customDefaultImgForGradient)
+        : setDefaultBg();
     }
 
-    if (lastAudioInfo.length > 2 && lastAudioInfo[2] && audioVolume != (parseFloat(lastAudioInfo[2])%100)/100) {
-      audioVolume = (parseFloat(lastAudioInfo[2])%100)/100
-      audio.volume = audioVolume; 
+    if (
+      lastAudioInfo.length > 2 &&
+      lastAudioInfo[2] &&
+      audioVolume != (parseFloat(lastAudioInfo[2]) % 100) / 100
+    ) {
+      audioVolume = (parseFloat(lastAudioInfo[2]) % 100) / 100;
+      audio.volume = audioVolume;
     }
     if (lastAudioInfo[1] == currentAudioIndex) return;
     if (lastAudioInfo.length > 0 && lastAudioInfo[1] != currentAudioIndex) {
@@ -333,7 +356,7 @@ document.querySelector(".ql-editor").onmousemove = (e) => {
       currentAudioIndex = lastAudioInfo[1];
       audio = new Audio(`media.php?type=aud&name=${lastAudioInfo[1]}`);
       audio.loop = true;
-      audio.volume = audioVolume;
+      audio.volume = isMute ? 0 : audioVolume;
       audio.play();
     } else if (lastAudioInfo === -1) {
       currentAudioIndex = lastAudioInfo[1];
@@ -346,6 +369,9 @@ quill.on("editor-change", (range) => {
   saved = false;
   document.getElementById("save-btn").classList.remove("save-btn-disabled");
   getLastImageKeyboard();
+  const data = quill.container.firstChild.innerText;
+  document.getElementById("word-count").innerHTML =
+    (data?.trim().split(/\S+/).length ?? 0) - 1;
 });
 
 function decorateMediaHolders() {
@@ -385,12 +411,11 @@ function getLastAudioMouse(mouseY) {
       audElement = el;
   }
   if (audElement) {
-    const audioInfo = audElement.innerHTML.split(":")
+    const audioInfo = audElement.innerHTML.split(":");
     // if (audioInfo.length > 2)
-      // audioVolume = (parseFloat(audioInfo[2])%10)/10;
+    // audioVolume = (parseFloat(audioInfo[2])%10)/10;
     return audioInfo;
-  }
-  else return [];
+  } else return [];
 }
 
 function getLastImageKeyboard() {
@@ -424,27 +449,33 @@ function getLastImageKeyboard() {
     }
   } else {
     currentImageIndex = -1;
-    customDefaultImgForGradient ? loadCg(customDefaultImgForGradient) : setDefaultBg();
+    customDefaultImgForGradient
+      ? loadCg(customDefaultImgForGradient)
+      : setDefaultBg();
   }
 
   decorateMediaHolders();
 
   if (audElement) {
-    const audioInfo = audElement.innerHTML.split(":")
+    const audioInfo = audElement.innerHTML.split(":");
     const aIndex = audioInfo[1];
     if (aIndex == currentAudioIndex) {
-      if (audioInfo.length > 2 && audioInfo[2] && audioVolume != (parseFloat(audioInfo[2])%100)/100) {
-        audioVolume = (parseFloat(audioInfo[2])%100)/100
-        audio.volume = audioVolume;
+      if (
+        audioInfo.length > 2 &&
+        audioInfo[2] &&
+        audioVolume != (parseFloat(audioInfo[2]) % 100) / 100
+      ) {
+        audioVolume = (parseFloat(audioInfo[2]) % 100) / 100;
+        audio.volume = isMute ? 0 : audioVolume;
       }
       return;
     }
     if (audioInfo.length > 2)
-      audioVolume = (parseFloat(audioInfo[2])%100)/100;
+      audioVolume = (parseFloat(audioInfo[2]) % 100) / 100;
     currentAudioIndex = aIndex;
     if (audio) audio.pause();
     audio = new Audio(`media.php?type=aud&name=${aIndex}`);
-    audio.volume = audioVolume;
+    audio.volume = isMute ? 0 : audioVolume;
     audio.loop = true;
     audio.play();
   } else {
@@ -489,4 +520,14 @@ document.getElementById("save-btn").onclick = () => {
 document.getElementById("close-btn").onclick = () => {
   sessionStorage.removeItem("current-story");
   window.location.href = "index.html";
+};
+
+document.getElementById("mute-btn").onclick = () => {
+  isMute = !isMute;
+  document.getElementById("mute-btn").innerHTML = isMute
+    ? '<path d="M301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.4 34.4-5.3zM425 167l55 55 55-55c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-55 55 55 55c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-55-55-55 55c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l55-55-55-55c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0z"/>'
+    : '<path d="M533.6 32.5C598.5 85.2 640 165.8 640 256s-41.5 170.7-106.4 223.5c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C557.5 398.2 592 331.2 592 256s-34.5-142.2-88.7-186.3c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5zM473.1 107c43.2 35.2 70.9 88.9 70.9 149s-27.7 113.8-70.9 149c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C475.3 341.3 496 301.1 496 256s-20.7-85.3-53.2-111.8c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5zm-60.5 74.5C434.1 199.1 448 225.9 448 256s-13.9 56.9-35.4 74.5c-10.3 8.4-25.4 6.8-33.8-3.5s-6.8-25.4 3.5-33.8C393.1 284.4 400 271 400 256s-6.9-28.4-17.7-37.3c-10.3-8.4-11.8-23.5-3.5-33.8s23.5-11.8 33.8-3.5zM301.1 34.8C312.6 40 320 51.4 320 64V448c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64V224c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.4 34.4-5.3z"/>';
+  if (audio) {
+    audio.volume = isMute ? 0 : audioVolume;
+  }
 };

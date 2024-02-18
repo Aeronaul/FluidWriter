@@ -124,6 +124,10 @@ body {
   font-size: 1.6rem;
 }
 
+.ql-container {
+  height: 99% !important;
+}
+
 .gradient-wrap {
   position: fixed;
   top: 0;
@@ -227,11 +231,33 @@ html {
 }
 
 #quillEditor > .ql-editor {
-  margin-block-start: 3vh;
+  margin-block-start: 4vh;
   height: 78vh;
 }
 
 .save-btn-disabled {
-  color: #999999;
+  color: #999;
   pointer-events: none;
+}
+
+#mute-btn {
+  fill: #999;
+  opacity: 0.5;
+  height: 15px;
+  width: 20px;
+  position:relative;
+  top:2px;
+}
+
+#mute-btn:hover {
+  fill: #fff;
+  cursor: pointer;
+}
+
+#info-bar {
+  float: right;
+}
+
+#mute-container {
+  padding-inline-end: 9%;
 }
