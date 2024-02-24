@@ -2,7 +2,7 @@
 // echo '<pre>'; print_r($_FILES); echo '</pre>';
 // echo '<pre>'; print_r($_POST); echo '</pre>';
 // echo phpinfo();
-$basedir = $_SERVER['DOCUMENT_ROOT'] . '/content/' . $_SESSION["story"];
+$basedir = dirname(getcwd()) . '/content/' . $_SESSION["story"];
 $filename = explode("/", $_FILES['file']['type']);
 $uploaddir = $basedir . '/img/';
 $uploadfile = $uploaddir . basename($_FILES['file']['name']);

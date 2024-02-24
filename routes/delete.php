@@ -1,5 +1,5 @@
 <?php
-removeDir($_SERVER['DOCUMENT_ROOT'] . "/content/" . $_GET['name']);
+removeDir(dirname(getcwd()) . "/content/" . $_GET['name']);
 
 function removeDir(string $dir): void {
     $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);

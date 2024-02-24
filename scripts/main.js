@@ -30,7 +30,7 @@ if (currentStory == null) {
   window.location.href = "index.html";
 }
 
-fetch("/count.php")
+fetch("/routes/count.php")
   .then((res) => res.json())
   .then((data) => {
     // console.log(data);
@@ -38,7 +38,7 @@ fetch("/count.php")
     audioIndex = data.aud + 1;
   });
 
-fetch(`/load.php?story=${currentStory}`)
+fetch(`/routes/load.php?story=${currentStory}`)
   .then((res) => res.json())
   .then((data) => {
     // console.log(data);
@@ -50,7 +50,7 @@ let latestUpload;
 let editorEnabled = false;
 
 let myDropzone = new Dropzone("#outer-layout", {
-  url: `/upload.php`,
+  url: `/routes/upload.php`,
   clickable: false,
   disablePreviews: true,
   paramName: "file", // The name that will be used to transfer the file
@@ -128,11 +128,11 @@ function loadCg(url) {
 }
 
 function loadCgIndex(index) {
-  loadCg(`media.php?type=img&name=${index}`);
+  loadCg(`routes/media.php?type=img&name=${index}`);
 }
 
 function loadCgShared(name) {
-  loadCg(`media.php?type=cimg&name=${name}`);
+  loadCg(`routes/media.php?type=cimg&name=${name}`);
 }
 
 let dragStartX, dragStartY, dragged;
@@ -378,7 +378,7 @@ document.querySelector(".ql-editor").onmousemove = (e) => {
       if (audio) audio.pause();
       currentAudio = lastAudioInfo[1];
       audio = new Audio(
-        `media.php?type=${lastAudioInfo[0]}&name=${lastAudioInfo[1]}`
+        `routes/media.php?type=${lastAudioInfo[0]}&name=${lastAudioInfo[1]}`
       );
       audio.loop = true;
       audio.volume = isMute ? 0 : audioVolume;
@@ -513,7 +513,7 @@ function getLastImageKeyboard() {
       audioVolume = (parseFloat(audioInfo[2]) % 100) / 100;
     currentAudio = aIndex;
     if (audio) audio.pause();
-    audio = new Audio(`media.php?type=aud&name=${aIndex}`);
+    audio = new Audio(`routes/media.php?type=aud&name=${aIndex}`);
     audio.volume = isMute ? 0 : audioVolume;
     audio.loop = true;
     audio.play();
@@ -535,7 +535,7 @@ function getLastImageKeyboard() {
       audioVolume = (parseFloat(audioInfo[2]) % 100) / 100;
     currentAudio = aFilename;
     if (audio) audio.pause();
-    audio = new Audio(`media.php?type=caud&name=${aFilename}`);
+    audio = new Audio(`routes/media.php?type=caud&name=${aFilename}`);
     audio.volume = isMute ? 0 : audioVolume;
     audio.loop = true;
     audio.play();
@@ -561,7 +561,7 @@ function getLastVisibleElementContents() {
 document.getElementById("save-btn").onclick = () => {
   const data = quill.container.firstChild.innerHTML;
   document.getElementById("quillEditor").classList.add("hide-cursor");
-  fetch(`/save.php?file=${sessionStorage.getItem("current-story")}`, {
+  fetch(`/routes/save.php?file=${sessionStorage.getItem("current-story")}`, {
     method: "POST",
     body: data,
   }).then(() => {

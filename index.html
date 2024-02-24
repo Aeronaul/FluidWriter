@@ -88,7 +88,7 @@
       });
 
       const sList = document.getElementById("story-list");
-      fetch("data.php")
+      fetch("routes/data.php")
         .then((res) => res.json())
         .then((data) => {
           data.forEach((d) => {

@@ -1,6 +1,6 @@
 <?php
 $_SESSION["story"] = $_GET['story'];
-$content_dir = getcwd() . '/content/';
+$content_dir = dirname(getcwd()) . '/content/';
 if (!is_dir($content_dir)) {
     mkdir($content_dir);
 }
