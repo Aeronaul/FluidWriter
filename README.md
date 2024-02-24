@@ -57,7 +57,7 @@ Following libraries were used in the making of this web app.
 - Quill
 - Grade.js
 - TinyZoom.js
-- CtxMenu-Javascript
+- CtxMenu by nils-soderman
 
 Note: Grade and TinyZoom were modified as per requirement.
 
