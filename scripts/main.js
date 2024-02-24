@@ -185,10 +185,26 @@ function setDefaultBg() {
 function resetSize() {
   document.getElementById("cg-canvas").width = image.width;
   document.getElementById("cg-canvas").height = image.height;
-  scaleFactor =
-    (document.getElementById("image-section").getBoundingClientRect().width -
-      200) /
-    image.width;
+  if (
+    image.height >
+    document.getElementById("image-section").getBoundingClientRect().height
+  ) {
+    scaleFactor =
+      document.getElementById("image-section").getBoundingClientRect().height /
+      image.height;
+  } else if (
+    image.width >
+    document.getElementById("image-section").getBoundingClientRect().width
+  ) {
+    scaleFactor =
+      document.getElementById("image-section").getBoundingClientRect().width /
+      image.width;
+  } else {
+    scaleFactor =
+      (document.getElementById("image-section").getBoundingClientRect().width -
+        200) /
+      image.width;
+  }
   zoom(1);
 }
 
