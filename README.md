@@ -47,9 +47,9 @@ Alternatively, you can also run the shell script:
 - Press escape in the text editor to enter read-only mode, which also emphasises the text under the cursor, fading the rest.
 - Ctrl-S for save, Ctrl-I for italic, Ctrl-B for bold.
 - The image, which is directly above your text cursor in edit mode, or above your mouse cursor in read-only mode, will be displayed.
-- Audio playback works in a similar fashion, with an additional setting for volume (0-100)
+- Audio playback works in a similar fashion, with an additional setting for volume (0-100).
 - Example: ```aud:filename:10```
-- User can also store media files as common in the shared directory. To refer to them in the editor, simply prepend with "c"
+- User can also store media files as common in the shared directory. To refer to them in the editor, simply prepend with "c".
 - Example: ```cimg:filename```
 
 ## Acknowledgements
