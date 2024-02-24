@@ -40,7 +40,8 @@
         cursor: pointer;
       }
 
-      a:link, a:visited {
+      a:link,
+      a:visited {
         color: #bebebe;
         background-color: transparent;
         text-decoration: none;
@@ -59,13 +60,40 @@
       <div id="story-list"></div>
     </div>
 
+    <script src="./scripts/ctxmenu.min.js"></script>
+
     <script>
+      var contextMenu = CtxMenu(".story-link");
+      
+      contextMenu.addItem("Rename", function (el) {
+        const newName = prompt(
+          "Enter a new name:", el.innerText
+        );
+        if (newName) {
+          fetch(`/rename.php?from=${el.innerText}&to=${newName}`).then((_) =>
+            window.location.reload()
+          );
+        }
+      });
+
+      contextMenu.addItem("Delete", function (el) {
+        const deleteStory = confirm(
+          "Are you sure you want to delete this scene?"
+        );
+        if (deleteStory) {
+          fetch(`/delete.php?name=${el.innerText}`).then((_) =>
+            window.location.reload()
+          );
+        }
+      });
+
       const sList = document.getElementById("story-list");
       fetch("data.php")
         .then((res) => res.json())
         .then((data) => {
           data.forEach((d) => {
             var anchor = document.createElement("a");
+            anchor.classList.add("story-link");
             anchor.href = "writer.html";
             const fileName = d.split("/").splice(-1);
             anchor.innerText = fileName;
@@ -81,8 +109,8 @@
       function newStory() {
         const newStoryName = prompt("Enter name of the story:");
         if (newStoryName) {
-            sessionStorage.setItem("current-story", newStoryName);
-            window.location.href = "writer.html";
+          sessionStorage.setItem("current-story", newStoryName);
+          window.location.href = "writer.html";
         }
       }
     </script>

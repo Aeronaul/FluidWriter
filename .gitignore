@@ -1,1 +1,7 @@
 content
+shared/aud/*.*
+shared/aud/*/*.*
+shared/img/*.*
+shared/img/*/*.*
+!shared/aud/place_audio_here.txt
+!shared/img/place_images_here.txt

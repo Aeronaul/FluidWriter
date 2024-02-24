@@ -2,8 +2,8 @@ const customDefaultImgForGradient = ""; // Set your default background image URL
 const defaultBgGradient =
   "background-image: linear-gradient(135deg, rgb(101, 158, 54) 0%, rgb(44, 55, 139) 75%); color: rgb(255, 255, 255);";
 // const defaultBg = "background-image: linear-gradient(135deg, rgb(131, 178, 204) 0%, rgb(124, 55, 39) 75%); color: rgb(255, 255, 255);";
-let currentImageIndex = -1;
-let currentAudioIndex = -1;
+let currentImage = -1;
+let currentAudio = -1;
 let saved = true;
 let audioVolume = 0.1;
 let isBold = false;
@@ -119,7 +119,7 @@ function loadCg(url) {
     document.getElementById("cg-background").style = Gradient(image);
 
     dragResetThreshold = Math.min(image.height, image.width) * dpRatio;
-    if (currentImageIndex === -1) {
+    if (currentImage === -1) {
       document.getElementById("cg-canvas").classList.add("hide");
     } else {
       document.getElementById("cg-canvas").classList.remove("hide");
@@ -129,6 +129,10 @@ function loadCg(url) {
 
 function loadCgIndex(index) {
   loadCg(`media.php?type=img&name=${index}`);
+}
+
+function loadCgShared(name) {
+  loadCg(`media.php?type=cimg&name=${name}`);
 }
 
 let dragStartX, dragStartY, dragged;
@@ -321,22 +325,25 @@ document.querySelector(".ql-editor").onscroll = (e) => {
   const item = getLastVisibleElementContents();
   if (item.startsWith("img:")) {
     const imgUrl = `content/${currentStory}/img/${item.substring("4")}`;
-    if (currentImageIndex !== imgUrl) {
-      currentImageIndex = imgUrl;
-      loadCgIndex(currentImageIndex);
+    if (currentImage !== imgUrl) {
+      currentImage = imgUrl;
+      loadCgIndex(currentImage);
     }
   }
 };
 
 document.querySelector(".ql-editor").onmousemove = (e) => {
   if (!editorEnabled) {
-    const lastImageIndex = getLastImageMouse(e.clientY);
+    const lastImageInfo = getLastImageMouse(e.clientY);
+    // console.log(lastImageInfo);
     const lastAudioInfo = getLastAudioMouse(e.clientY);
-    if (lastImageIndex > 0 && lastImageIndex != currentImageIndex) {
-      currentImageIndex = lastImageIndex;
-      loadCgIndex(currentImageIndex);
-    } else if (lastImageIndex === -1) {
-      currentImageIndex = lastImageIndex;
+    // console.log(lastAudioInfo);
+    if (lastImageInfo.length > 0 && lastImageInfo != currentImage) {
+      currentImage = lastImageInfo[1];
+      if (lastImageInfo[0] === "img") loadCgIndex(currentImage);
+      else if (lastImageInfo[0] === "cimg") loadCgShared(currentImage);
+    } else if (lastImageInfo.length === 0) {
+      currentImage = lastImageInfo;
       customDefaultImgForGradient
         ? loadCg(customDefaultImgForGradient)
         : setDefaultBg();
@@ -350,16 +357,18 @@ document.querySelector(".ql-editor").onmousemove = (e) => {
       audioVolume = (parseFloat(lastAudioInfo[2]) % 100) / 100;
       audio.volume = audioVolume;
     }
-    if (lastAudioInfo[1] == currentAudioIndex) return;
-    if (lastAudioInfo.length > 0 && lastAudioInfo[1] != currentAudioIndex) {
+    if (lastAudioInfo[1] == currentAudio) return;
+    if (lastAudioInfo.length > 0 && lastAudioInfo[1] != currentAudio) {
       if (audio) audio.pause();
-      currentAudioIndex = lastAudioInfo[1];
-      audio = new Audio(`media.php?type=aud&name=${lastAudioInfo[1]}`);
+      currentAudio = lastAudioInfo[1];
+      audio = new Audio(
+        `media.php?type=${lastAudioInfo[0]}&name=${lastAudioInfo[1]}`
+      );
       audio.loop = true;
       audio.volume = isMute ? 0 : audioVolume;
       audio.play();
     } else if (lastAudioInfo === -1) {
-      currentAudioIndex = lastAudioInfo[1];
+      currentAudio = lastAudioInfo[1];
       audio.pause();
     }
   }
@@ -378,7 +387,12 @@ function decorateMediaHolders() {
   let ch = document.querySelectorAll(".ql-editor>*");
   let element;
   for (var el of ch) {
-    if (el.innerHTML.startsWith("img:") || el.innerHTML.startsWith("aud:")) {
+    if (
+      el.innerHTML.startsWith("img:") ||
+      el.innerHTML.startsWith("cimg:") ||
+      el.innerHTML.startsWith("aud:") ||
+      el.innerHTML.startsWith("caud:")
+    ) {
       el.classList.add("media-marker");
     } else {
       el.classList.remove("media-marker");
@@ -392,12 +406,12 @@ function getLastImageMouse(mouseY) {
   for (var el of ch) {
     if (
       el.getBoundingClientRect().bottom < mouseY &&
-      el.innerHTML.startsWith("img:")
+      (el.innerHTML.startsWith("img:") || el.innerHTML.startsWith("cimg:"))
     )
       imgElement = el;
   }
-  if (imgElement) return imgElement.innerHTML.substring("4");
-  else return -1;
+  if (imgElement) return imgElement.innerHTML.split(":");
+  else return [];
 }
 
 function getLastAudioMouse(mouseY) {
@@ -406,7 +420,7 @@ function getLastAudioMouse(mouseY) {
   for (var el of ch) {
     if (
       el.getBoundingClientRect().bottom < mouseY &&
-      el.innerHTML.startsWith("aud:")
+      (el.innerHTML.startsWith("aud:") || el.innerHTML.startsWith("caud:"))
     )
       audElement = el;
   }
@@ -427,7 +441,9 @@ function getLastImageKeyboard() {
     // node
   }
   let imgElement;
+  let cimgElement;
   let audElement;
+  let caudElement;
   for (var el of ch) {
     if (
       el.getBoundingClientRect().bottom <=
@@ -437,18 +453,25 @@ function getLastImageKeyboard() {
       ).bottom
     ) {
       if (el.innerHTML.startsWith("img:")) imgElement = el;
+      else if (el.innerHTML.startsWith("cimg:")) cimgElement = el;
       else if (el.innerHTML.startsWith("aud:")) audElement = el;
+      else if (el.innerHTML.startsWith("caud:")) caudElement = el;
     }
   }
-
   if (imgElement) {
     const i = imgElement.innerHTML.substring("4");
-    if (currentImageIndex != i) {
-      currentImageIndex = i;
+    if (currentImage != i) {
+      currentImage = i;
       loadCgIndex(i);
     }
+  } else if (cimgElement) {
+    const i = cimgElement.innerHTML.substring("5");
+    if (currentImage != i) {
+      currentImage = i;
+      loadCgShared(i);
+    }
   } else {
-    currentImageIndex = -1;
+    currentImage = -1;
     customDefaultImgForGradient
       ? loadCg(customDefaultImgForGradient)
       : setDefaultBg();
@@ -459,7 +482,7 @@ function getLastImageKeyboard() {
   if (audElement) {
     const audioInfo = audElement.innerHTML.split(":");
     const aIndex = audioInfo[1];
-    if (aIndex == currentAudioIndex) {
+    if (aIndex == currentAudio) {
       if (
         audioInfo.length > 2 &&
         audioInfo[2] &&
@@ -472,14 +495,36 @@ function getLastImageKeyboard() {
     }
     if (audioInfo.length > 2)
       audioVolume = (parseFloat(audioInfo[2]) % 100) / 100;
-    currentAudioIndex = aIndex;
+    currentAudio = aIndex;
     if (audio) audio.pause();
     audio = new Audio(`media.php?type=aud&name=${aIndex}`);
     audio.volume = isMute ? 0 : audioVolume;
     audio.loop = true;
     audio.play();
+  } else if (caudElement) {
+    const audioInfo = caudElement.innerHTML.split(":");
+    const aFilename = audioInfo[1];
+    if (aFilename == currentAudio) {
+      if (
+        audioInfo.length > 2 &&
+        audioInfo[2] &&
+        audioVolume != (parseFloat(audioInfo[2]) % 100) / 100
+      ) {
+        audioVolume = (parseFloat(audioInfo[2]) % 100) / 100;
+        audio.volume = isMute ? 0 : audioVolume;
+      }
+      return;
+    }
+    if (audioInfo.length > 2)
+      audioVolume = (parseFloat(audioInfo[2]) % 100) / 100;
+    currentAudio = aFilename;
+    if (audio) audio.pause();
+    audio = new Audio(`media.php?type=caud&name=${aFilename}`);
+    audio.volume = isMute ? 0 : audioVolume;
+    audio.loop = true;
+    audio.play();
   } else {
-    currentAudioIndex = -1;
+    currentAudio = -1;
     if (audio) audio.pause();
   }
 }

@@ -10,5 +10,10 @@ if ($type === 'img') {
 } elseif ($type === 'aud') {
     $files = glob($_SERVER['DOCUMENT_ROOT'] . "/content/" . $_SESSION["story"] . "/aud/" . $name . ".*");
     header("Location: /content/" . $_SESSION["story"] . "/aud/" . basename($files[0]));
-} 
-?>
+} elseif ($type === 'cimg') {
+    $files = glob($_SERVER['DOCUMENT_ROOT'] . "/shared/img/" . $name . ".*");
+    header("Location: " . substr($files[0], strlen($_SERVER['DOCUMENT_ROOT'])));
+} elseif ($type === 'caud') {
+    $files = glob($_SERVER['DOCUMENT_ROOT'] . "/shared/aud/" . $name . ".*");
+    header("Location: " . substr($files[0], strlen($_SERVER['DOCUMENT_ROOT'])));
+}

@@ -1,4 +1,3 @@
 <?php 
 $directory = getcwd() . '/content/*';
-echo json_encode(glob($directory))
-?>
+echo json_encode(glob($directory));

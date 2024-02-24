@@ -44,15 +44,21 @@ Alternatively, you can also run the shell script:
 - You can drag and drop images and audio files onto the browser window to create a reference to these files at specific points in the story.
 - These files are renamed to a numeric index value, which you can find in the ```content/(your-story)/``` folder
 - Scroll on the image in the left pane to zoom on it.
-- Double click on the text editor on the right to enter read-only mode, which also emphasises the text under the cursor, fading the rest.
+- Press escape in the text editor to enter read-only mode, which also emphasises the text under the cursor, fading the rest.
+- Ctrl-S for save, Ctrl-I for italic, Ctrl-B for bold.
 - The image, which is directly above your text cursor in edit mode, or above your mouse cursor in read-only mode, will be displayed.
-- Audio playback works in a similar fashion.
+- Audio playback works in a similar fashion, with an additional setting for volume (0-100)
+- Example: ```aud:filename:10```
+- User can also store media files as common in the shared directory. To refer to them in the editor, simply prepend with "c"
+- Example: ```cimg:filename```
 
 ## Acknowledgements
-Following libraries were used in the making of this web app. The latter two were modified as per requirement.
+Following libraries were used in the making of this web app.
 - Quill
 - Grade.js
 - TinyZoom.js
+- CtxMenu-Javascript
+Note: Grade and TinyZoom were modified as per requirement.
 
 ## Contact
 For any questions or inquiries, please contact me at: aeronaul@proton.me.

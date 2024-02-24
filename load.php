@@ -13,4 +13,3 @@ if (!is_dir($upload_dir)) {
 $upload_file = $upload_dir . '/script.fld';
 $file_content = file_get_contents($upload_file);
 echo json_encode($file_content);
-?>
