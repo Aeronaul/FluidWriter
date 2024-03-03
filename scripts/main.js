@@ -192,19 +192,17 @@ function resetSize() {
     scaleFactor =
       document.getElementById("image-section").getBoundingClientRect().height /
       image.height;
-  } else if (
-    image.width >
-    document.getElementById("image-section").getBoundingClientRect().width
-  ) {
+  } else {
     scaleFactor =
       document.getElementById("image-section").getBoundingClientRect().width /
       image.width;
-  } else {
-    scaleFactor =
-      (document.getElementById("image-section").getBoundingClientRect().width -
-        200) /
-      image.width;
-  }
+  } 
+  // else {
+  //   scaleFactor =
+  //     (document.getElementById("image-section").getBoundingClientRect().width -
+  //       200) /
+  //     image.width;
+  // }
   zoom(1);
 }
 
@@ -276,11 +274,12 @@ document.getElementById("image-section").addEventListener("dblclick", () => {
   resetPosition();
   dragStartX = 0;
   dragStartY = 0;
-  scaleFactor =
-    (document.getElementById("image-section").getBoundingClientRect().width -
-      200) /
-    image.width;
-  zoom(1);
+  // scaleFactor =
+  //   (document.getElementById("image-section").getBoundingClientRect().width -
+  //     200) /
+  //   image.width;
+  // zoom(1);
+  resetSize()
 });
 
 document.getElementById("text-section").addEventListener("mouseup", () => {
@@ -468,10 +467,22 @@ function getLastImageKeyboard() {
         : node.parentElement.getBoundingClientRect()
       ).bottom
     ) {
-      if (el.innerHTML.startsWith("img:")) imgElement = el;
-      else if (el.innerHTML.startsWith("cimg:")) cimgElement = el;
-      else if (el.innerHTML.startsWith("aud:")) audElement = el;
-      else if (el.innerHTML.startsWith("caud:")) caudElement = el;
+      if (el.innerHTML.startsWith("img:")) {
+        imgElement = el;
+        cimgElement = null;
+      }
+      else if (el.innerHTML.startsWith("cimg:")) {
+        cimgElement = el
+        imgElement = null;
+      }
+      else if (el.innerHTML.startsWith("aud:")) {
+        audElement = el
+        caudElement = null
+      }
+      else if (el.innerHTML.startsWith("caud:")) {
+        caudElement = el
+        audElement = null
+      };
     }
   }
   if (imgElement) {

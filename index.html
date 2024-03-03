@@ -70,7 +70,7 @@
           "Enter a new name:", el.innerText
         );
         if (newName) {
-          fetch(`/rename.php?from=${el.innerText}&to=${newName}`).then((_) =>
+          fetch(`routes/rename.php?from=${el.innerText}&to=${newName}`).then((_) =>
             window.location.reload()
           );
         }
@@ -81,7 +81,7 @@
           "Are you sure you want to delete this scene?"
         );
         if (deleteStory) {
-          fetch(`/delete.php?name=${el.innerText}`).then((_) =>
+          fetch(`routes/delete.php?name=${el.innerText}`).then((_) =>
             window.location.reload()
           );
         }

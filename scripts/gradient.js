@@ -131,6 +131,7 @@ function getSortedValues(uniq) {
 }
 
 function getTextProperty(top) {
+    if (top[0] == null) return;
     var rgb = this.getMiddleRGB(top[0].rgba.slice(0, 3), top[1].rgba.slice(0, 3));
     var o = Math.round((parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000);
     if (o > 125) {
