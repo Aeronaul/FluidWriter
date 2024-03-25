@@ -261,3 +261,9 @@ html {
 #mute-container {
   padding-inline-end: 9%;
 }
+
+#gradient-icon {
+  height: 13px;
+  width: 13px;
+  margin-right: -2px;
+}

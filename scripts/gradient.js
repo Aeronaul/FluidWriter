@@ -43,7 +43,9 @@ function renderGradient() {
 
     if (ls && ls.getItem(item_name)) {
         top = JSON.parse(ls.getItem(item_name));
+        console.log('test1')
     } else {
+        console.log('test2')
         var chunked = this.getChunkedImageData();
         top = this.getTopValues(this.getUniqValues(chunked));
 
@@ -66,8 +68,9 @@ function renderGradient() {
 }
 
 function getChunkedImageData() {
-    var perChunk = 4;
-
+    const max = 10;
+    const min = 4;
+    var perChunk = Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) + min;
     var chunked = this.imageData.reduce(function (ar, it, i) {
         var ix = Math.floor(i / perChunk);
         if (!ar[ix]) {

@@ -105,6 +105,8 @@ let myDropzone = new Dropzone("#outer-layout", {
 
 const image = new Image();
 function loadCg(url) {
+  if (image && image.src.includes(url)) return;
+  console.log(image.src, url)
   image.src = url;
   image.onload = () => {
     resetSize();
@@ -133,6 +135,17 @@ function loadCgIndex(index) {
 
 function loadCgShared(name) {
   loadCg(`routes/media.php?type=cimg&name=${name}`);
+}
+
+function refreshGradient() {
+  console.log(image.src)
+  const i = image.src.indexOf('routes');
+  const imgKey = image.src.slice(i);
+  console.log(imgKey);
+  localStorage.removeItem(`grade-${image.src}`)
+  const url = image.src;
+  image.src = '';
+  loadCg(url);
 }
 
 let dragStartX, dragStartY, dragged;
@@ -188,6 +201,7 @@ function resetSize() {
   if (
     image.height >
     document.getElementById("image-section").getBoundingClientRect().height
+    && image.height > image.width
   ) {
     scaleFactor =
       document.getElementById("image-section").getBoundingClientRect().height /
@@ -603,3 +617,7 @@ document.getElementById("mute-btn").onclick = () => {
     audio.volume = isMute ? 0 : audioVolume;
   }
 };
+
+document.getElementById("gradient-btn").onclick = () => {
+  refreshGradient();
+}
