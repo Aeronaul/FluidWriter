@@ -10,6 +10,10 @@ let isBold = false;
 let isItalic = false;
 let isMute = false;
 
+let abbreviations = new Map();
+let lastMouseX = 0;
+let lastMouseY = 0;
+
 localStorage.clear();
 
 let quill = new Quill("#quillEditor", {
@@ -44,6 +48,15 @@ fetch(`/routes/load.php?story=${currentStory}`)
     // console.log(data);
     quill.pasteHTML(data);
     document.getElementById("save-btn").classList.add("save-btn-disabled");
+  });
+
+fetch('/routes/abbreviations.php')
+  .then((res) => res.json())
+  .then((data) => {
+    const parsedData = JSON.parse(data);
+    for (let abbr in parsedData) {
+      abbreviations.set(abbr, parsedData[abbr]);
+    }
   });
 
 let latestUpload;
@@ -106,7 +119,6 @@ let myDropzone = new Dropzone("#outer-layout", {
 const image = new Image();
 function loadCg(url) {
   if (image && image.src.includes(url)) return;
-  console.log(image.src, url)
   image.src = url;
   image.onload = () => {
     resetSize();
@@ -138,10 +150,8 @@ function loadCgShared(name) {
 }
 
 function refreshGradient() {
-  console.log(image.src)
   const i = image.src.indexOf('routes');
   const imgKey = image.src.slice(i);
-  console.log(imgKey);
   localStorage.removeItem(`grade-${image.src}`)
   const url = image.src;
   image.src = '';
@@ -407,14 +417,41 @@ quill.on("editor-change", (range) => {
   saved = false;
   document.getElementById("save-btn").classList.remove("save-btn-disabled");
   getLastImageKeyboard();
+  replaceAbbrieviations();
   const data = quill.container.firstChild.innerText;
   document.getElementById("word-count").innerHTML =
     (data?.trim().split(/\S+/).length ?? 0) - 1;
 });
 
+function replaceAbbrieviations() {
+  let ch = document.querySelectorAll(".ql-editor>*");
+  let lastLine;
+  if (document.getSelection().rangeCount === 0) return;
+  const node = document.getSelection().getRangeAt(0).startContainer;
+  if (node == null) return;
+  const currentLineCoord = (node.getBoundingClientRect
+    ? node.getBoundingClientRect()
+    : node.parentElement.getBoundingClientRect()
+  ).bottom;
+  // console.log(currentLineCoord)
+  for (var el of ch) {
+    if (
+      el.getBoundingClientRect().bottom < currentLineCoord
+    )
+      lastLine = el;
+  }
+  if (lastLine) {
+    const regex = /:\w+/;
+    const matches = regex.exec(lastLine.innerText);
+    if (!matches) return;
+    for (let match of matches) {
+      lastLine.innerText = lastLine.innerText.replace(match, abbreviations.get(match.slice(1)));
+    }
+  }
+}
+
 function decorateMediaHolders() {
   let ch = document.querySelectorAll(".ql-editor>*");
-  let element;
   for (var el of ch) {
     if (
       el.innerHTML.startsWith("img:") ||

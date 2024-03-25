@@ -43,9 +43,7 @@ function renderGradient() {
 
     if (ls && ls.getItem(item_name)) {
         top = JSON.parse(ls.getItem(item_name));
-        console.log('test1')
     } else {
-        console.log('test2')
         var chunked = this.getChunkedImageData();
         top = this.getTopValues(this.getUniqValues(chunked));
 
