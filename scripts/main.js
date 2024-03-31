@@ -1,6 +1,7 @@
 const customDefaultImgForGradient = ""; // Set your default background image URL here
 const defaultBgGradient =
   "background-image: linear-gradient(135deg, rgb(101, 158, 54) 0%, rgb(44, 55, 139) 75%); color: rgb(255, 255, 255);";
+  // "background-color: black";
 // const defaultBg = "background-image: linear-gradient(135deg, rgb(131, 178, 204) 0%, rgb(124, 55, 39) 75%); color: rgb(255, 255, 255);";
 let currentImage = -1;
 let currentAudio = -1;
@@ -14,6 +15,9 @@ let abbreviations = new Map();
 let lastMouseX = 0;
 let lastMouseY = 0;
 
+const startQuote = '"';
+const endQuote = '"';
+
 localStorage.clear();
 
 let quill = new Quill("#quillEditor", {
@@ -23,6 +27,7 @@ let quill = new Quill("#quillEditor", {
 });
 
 quill.root.setAttribute("spellcheck", false);
+delete quill.getModule("keyboard").bindings["9"];
 
 let imageIndex = 1;
 let audioIndex = 1;
@@ -50,7 +55,7 @@ fetch(`/routes/load.php?story=${currentStory}`)
     document.getElementById("save-btn").classList.add("save-btn-disabled");
   });
 
-fetch('/routes/abbreviations.php')
+fetch("/routes/abbreviations.php")
   .then((res) => res.json())
   .then((data) => {
     const parsedData = JSON.parse(data);
@@ -150,11 +155,12 @@ function loadCgShared(name) {
 }
 
 function refreshGradient() {
-  const i = image.src.indexOf('routes');
+  const i = image.src.indexOf("routes");
   const imgKey = image.src.slice(i);
-  localStorage.removeItem(`grade-${image.src}`)
+  console.log(i, image.src)
+  localStorage.removeItem(`grade-${image.src}`);
   const url = image.src;
-  image.src = '';
+  image.src = "";
   loadCg(url);
 }
 
@@ -210,8 +216,8 @@ function resetSize() {
   document.getElementById("cg-canvas").height = image.height;
   if (
     image.height >
-    document.getElementById("image-section").getBoundingClientRect().height
-    && image.height > image.width
+      document.getElementById("image-section").getBoundingClientRect().height &&
+    image.height > image.width
   ) {
     scaleFactor =
       document.getElementById("image-section").getBoundingClientRect().height /
@@ -220,7 +226,7 @@ function resetSize() {
     scaleFactor =
       document.getElementById("image-section").getBoundingClientRect().width /
       image.width;
-  } 
+  }
   // else {
   //   scaleFactor =
   //     (document.getElementById("image-section").getBoundingClientRect().width -
@@ -303,7 +309,7 @@ document.getElementById("image-section").addEventListener("dblclick", () => {
   //     200) /
   //   image.width;
   // zoom(1);
-  resetSize()
+  resetSize();
 });
 
 document.getElementById("text-section").addEventListener("mouseup", () => {
@@ -347,6 +353,10 @@ document.getElementById("quillEditor").onkeydown = (e) => {
     e.preventDefault();
     isItalic = !isItalic;
     quill.format("italic", isItalic);
+  } else if (e.key === "Tab") {
+    e.preventDefault();
+    console.log("Tabbed");
+    toggleQuotes();
   }
 };
 
@@ -418,34 +428,86 @@ quill.on("editor-change", (range) => {
   document.getElementById("save-btn").classList.remove("save-btn-disabled");
   getLastImageKeyboard();
   replaceAbbrieviations();
+  fixLastLine();
   const data = quill.container.firstChild.innerText;
   document.getElementById("word-count").innerHTML =
     (data?.trim().split(/\S+/).length ?? 0) - 1;
 });
 
-function replaceAbbrieviations() {
+function getLastLine(includeLast = false) {
   let ch = document.querySelectorAll(".ql-editor>*");
   let lastLine;
   if (document.getSelection().rangeCount === 0) return;
   const node = document.getSelection().getRangeAt(0).startContainer;
   if (node == null) return;
-  const currentLineCoord = (node.getBoundingClientRect
-    ? node.getBoundingClientRect()
-    : node.parentElement.getBoundingClientRect()
+  const currentLineCoord = (
+    node.getBoundingClientRect
+      ? node.getBoundingClientRect()
+      : node.parentElement.getBoundingClientRect()
   ).bottom;
   // console.log(currentLineCoord)
   for (var el of ch) {
-    if (
-      el.getBoundingClientRect().bottom < currentLineCoord
-    )
-      lastLine = el;
+    if (el.innerText.includes('img:') || el.innerText.includes('aud:') || el.innerText.includes('cimg:') || el.innerText.includes('caud:')) continue;
+    if (includeLast) {
+      if (el.getBoundingClientRect().bottom <= currentLineCoord) lastLine = el;
+    } else {
+      if (el.getBoundingClientRect().bottom < currentLineCoord) lastLine = el;
+    }
   }
+  return lastLine;
+}
+
+function replaceAbbrieviations() {
+  const lastLine = getLastLine();
   if (lastLine) {
     const regex = /:\w+/;
     const matches = regex.exec(lastLine.innerText);
     if (!matches) return;
     for (let match of matches) {
-      lastLine.innerText = lastLine.innerText.replace(match, abbreviations.get(match.slice(1)));
+      const replaceString = abbreviations.get(match.slice(1));
+      lastLine.innerText = lastLine.innerText.replace(
+        match,
+        replaceString ?? match.slice(1)
+      );
+    }
+  }
+}
+
+function fixLastLine() {
+  const lastLine = getLastLine();
+  if (lastLine) {
+    if ((matches = /\w{1}(\.|\?|~|!|,)\w{1}/.exec(lastLine.innerText))) {
+      matches.splice(1);
+      for (let match of matches) {
+        const replaceString = match.slice(0, 2) + " " + match.slice(2);
+        lastLine.innerText = lastLine.innerText.replace(match, replaceString);
+      }
+    }
+
+    console.log(lastLine.innerText);
+
+    if ((matches = /(\.|\?|\!) [a-z]{1}/.exec(lastLine.innerText))) {
+      // matches.splice(1);
+      console.log(matches);
+      for (let match of matches) {
+        console.log(match);
+        const replaceString = match.slice(0, 2) + match.slice(2).toUpperCase();
+        lastLine.innerText = lastLine.innerText.replace(
+          match,
+          replaceString ?? match
+        );
+      }
+    }
+
+    if ((matches = /^[a-z]{1}/.exec(lastLine.innerText))) {
+      for (let match of matches) {
+        const replaceString = match.slice(0, 1).toUpperCase() + match.slice(1);
+        lastLine.innerText = lastLine.innerText.replace(match, replaceString);
+      }
+    }
+
+    if ((matches = /\w$/.exec(lastLine.innerText))) {
+      lastLine.innerText = lastLine.innerText + ".";
     }
   }
 }
@@ -521,19 +583,16 @@ function getLastImageKeyboard() {
       if (el.innerHTML.startsWith("img:")) {
         imgElement = el;
         cimgElement = null;
-      }
-      else if (el.innerHTML.startsWith("cimg:")) {
-        cimgElement = el
+      } else if (el.innerHTML.startsWith("cimg:")) {
+        cimgElement = el;
         imgElement = null;
+      } else if (el.innerHTML.startsWith("aud:")) {
+        audElement = el;
+        caudElement = null;
+      } else if (el.innerHTML.startsWith("caud:")) {
+        caudElement = el;
+        audElement = null;
       }
-      else if (el.innerHTML.startsWith("aud:")) {
-        audElement = el
-        caudElement = null
-      }
-      else if (el.innerHTML.startsWith("caud:")) {
-        caudElement = el
-        audElement = null
-      };
     }
   }
   if (imgElement) {
@@ -620,6 +679,23 @@ function getLastVisibleElementContents() {
   return element.innerHTML;
 }
 
+function toggleQuotes() {
+  const lastLine = getLastLine();
+  console.log(lastLine);
+  if (!lastLine) return;
+  if (
+    lastLine.innerText.charAt(0) === startQuote &&
+    lastLine.innerText.charAt(lastLine.innerText.length - 1) === endQuote
+  ) {
+    lastLine.innerText = lastLine.innerText.slice(1, -1);
+  } else if (
+    lastLine.innerText.charAt(0) !== startQuote &&
+    lastLine.innerText.charAt(lastLine.innerText.length - 1) !== endQuote
+  ) {
+    lastLine.innerText = startQuote + lastLine.innerText + endQuote;
+  }
+}
+
 document.getElementById("save-btn").onclick = () => {
   const data = quill.container.firstChild.innerHTML;
   document.getElementById("quillEditor").classList.add("hide-cursor");
@@ -657,4 +733,4 @@ document.getElementById("mute-btn").onclick = () => {
 
 document.getElementById("gradient-btn").onclick = () => {
   refreshGradient();
-}
+};

@@ -66,7 +66,7 @@ function renderGradient() {
 }
 
 function getChunkedImageData() {
-    const max = 10;
+    const max = 5;
     const min = 4;
     var perChunk = Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) + min;
     var chunked = this.imageData.reduce(function (ar, it, i) {
