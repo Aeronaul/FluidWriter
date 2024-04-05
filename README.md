@@ -54,11 +54,11 @@ Alternatively, you can also run the shell script:
 - User can also store media files as common in the shared directory. To refer to them in the editor, simply prepend with "c".
 - Example: ```cimg:filename```.
 - User can set abbreviations in json file, and invoke them in the editor by prepending with a colon.
-- Example" ```:gtg``` turns into ```Gotta go```
+- Example: ```:gtg``` turns into ```Gotta go```
 - Sentences automatically get adjusted when you enter a new line, capitalising first letter of the first word of every sentence and adding space after certain punctuation marks.
 - Opacity slider can be used to alter the opacity of the text editor window.
 - User can also make the text editor shift to the center of the screen (by default it resides on the right.)
-- Stories can be hidden from the index by prepending their folders with an underscore.
+- Stories can be hidden from the index page by prepending their folders with an underscore.
 - User can toggle display of the background via a button in the toolbar.
 
 ## Acknowledgements
