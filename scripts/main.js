@@ -1,7 +1,7 @@
 const customDefaultImgForGradient = ""; // Set your default background image URL here
 const defaultBgGradient =
   "background-image: linear-gradient(135deg, rgb(101, 158, 54) 0%, rgb(44, 55, 139) 75%); color: rgb(255, 255, 255);";
-  // "background-color: black";
+// "background-color: black";
 // const defaultBg = "background-image: linear-gradient(135deg, rgb(131, 178, 204) 0%, rgb(124, 55, 39) 75%); color: rgb(255, 255, 255);";
 let currentImage = -1;
 let currentAudio = -1;
@@ -34,6 +34,9 @@ let audioIndex = 1;
 let audio;
 
 const currentStory = sessionStorage.getItem("current-story");
+clearImageMetadata();
+
+document.getElementById("ql-container").classList.add("ql-container-left");
 
 if (currentStory == null) {
   window.location.href = "index.html";
@@ -52,7 +55,7 @@ fetch(`/routes/load.php?story=${currentStory}`)
   .then((data) => {
     // console.log(data);
     quill.pasteHTML(data);
-    document.getElementById("save-btn").classList.add("save-btn-disabled");
+    document.getElementById("save-btn").classList.add("btn-disabled");
   });
 
 fetch("/routes/abbreviations.php")
@@ -88,7 +91,6 @@ let myDropzone = new Dropzone("#outer-layout", {
   },
   init: function () {
     this.on("queuecomplete", function () {
-      // console.log(latestUpload);
       if (!latestUpload) return;
       if (latestUpload.type.match("image/.*")) {
         const docSelection = document.getSelection();
@@ -126,7 +128,6 @@ function loadCg(url) {
   if (image && image.src.includes(url)) return;
   image.src = url;
   image.onload = () => {
-    resetSize();
     ctx.drawImage(
       image,
       0,
@@ -134,7 +135,8 @@ function loadCg(url) {
       document.getElementById("cg-canvas").width,
       document.getElementById("cg-canvas").height
     );
-    resetPosition();
+    resetSize(false);
+    restorePosition();
     document.getElementById("cg-background").style = Gradient(image);
 
     dragResetThreshold = Math.min(image.height, image.width) * dpRatio;
@@ -157,7 +159,6 @@ function loadCgShared(name) {
 function refreshGradient() {
   const i = image.src.indexOf("routes");
   const imgKey = image.src.slice(i);
-  console.log(i, image.src)
   localStorage.removeItem(`grade-${image.src}`);
   const url = image.src;
   image.src = "";
@@ -201,6 +202,12 @@ document.getElementById("cg-canvas").addEventListener("wheel", (event) => {
   zoom(scale);
 });
 
+document.getElementById("cg-background").addEventListener("wheel", (event) => {
+  event.preventDefault();
+  const scale = event.deltaY > 0 ? 0.9 : 1.1;
+  zoom(scale);
+});
+
 customDefaultImgForGradient
   ? loadCg(customDefaultImgForGradient)
   : setDefaultBg();
@@ -211,45 +218,92 @@ function setDefaultBg() {
   document.getElementById("cg-background").style = defaultBgGradient;
 }
 
-function resetSize() {
+function resetSize(resetZoom = true) {
   document.getElementById("cg-canvas").width = image.width;
   document.getElementById("cg-canvas").height = image.height;
-  if (
-    image.height >
-      document.getElementById("image-section").getBoundingClientRect().height &&
-    image.height > image.width
-  ) {
-    scaleFactor =
-      document.getElementById("image-section").getBoundingClientRect().height /
-      image.height;
+  if (isCenterModeActive()) {
+    if (
+      image.height >=
+        image.width
+    ) {
+      scaleFactor =
+        document.getElementById("outer-layout").getBoundingClientRect().height /
+        image.height;
+    } else {
+      scaleFactor =
+        document.getElementById("outer-layout").getBoundingClientRect().width /
+        image.width;
+    }
   } else {
-    scaleFactor =
-      document.getElementById("image-section").getBoundingClientRect().width /
-      image.width;
+    if (
+      image.height >
+        image.width
+    ) {
+      scaleFactor =
+        document.getElementById("image-section").getBoundingClientRect()
+          .height / image.height;
+    } else {
+      scaleFactor =
+        document.getElementById("image-section").getBoundingClientRect().width /
+        image.width;
+    }
   }
-  // else {
-  //   scaleFactor =
-  //     (document.getElementById("image-section").getBoundingClientRect().width -
-  //       200) /
-  //     image.width;
-  // }
-  zoom(1);
+  zoom(resetZoom ? 1 : -1);
 }
 
 function resetPosition() {
-  document.getElementById("cg-canvas").style.left =
-    document.getElementById("image-section").getBoundingClientRect().width / 2 -
-    document.getElementById("cg-canvas").width / 2 +
-    "px";
-  document.getElementById("cg-canvas").style.top =
-    document.getElementById("image-section").getBoundingClientRect().height /
-      2 -
-    document.getElementById("cg-canvas").height / 2 +
-    "px";
+  sessionStorage.removeItem(`image-pos-${currentImage}`);
+  if (isCenterModeActive()) {
+    document.getElementById("cg-canvas").style.left =
+      document.getElementById("outer-layout").getBoundingClientRect().width /
+        2 -
+      document.getElementById("cg-canvas").width / 2 +
+      "px";
+    document.getElementById("cg-canvas").style.top =
+      document.getElementById("outer-layout").getBoundingClientRect().height /
+        2 -
+      document.getElementById("cg-canvas").height / 2 +
+      "px";
+  } else {
+    document.getElementById("cg-canvas").style.left =
+      document.getElementById("image-section").getBoundingClientRect().width /
+        2 -
+      document.getElementById("cg-canvas").width / 2 +
+      "px";
+    document.getElementById("cg-canvas").style.top =
+      document.getElementById("image-section").getBoundingClientRect().height /
+        2 -
+      document.getElementById("cg-canvas").height / 2 +
+      "px";
+  }
 }
 
-function zoom(scale) {
-  scaleFactor *= scale;
+function restorePosition() {
+  const positionData = JSON.parse(
+    sessionStorage.getItem(`image-pos-${currentImage}`)
+  );
+  if (positionData) {
+    document.getElementById("cg-canvas").style.left = positionData.left + "px";
+    document.getElementById("cg-canvas").style.top = positionData.top + "px";
+  } else {
+    resetPosition();
+  }
+}
+
+function isCenterModeActive() {
+  return document
+    .getElementById("center-btn")
+    .classList.contains("btn-activated");
+}
+
+function zoom(scale = -1) {
+  if (scale === -1) {
+    if (sessionStorage.getItem("image-scale-" + currentImage))
+      scaleFactor = sessionStorage.getItem("image-scale-" + currentImage);
+  } else {
+    scaleFactor *= scale;
+    sessionStorage.setItem("image-scale-" + currentImage, scaleFactor);
+  }
   document.getElementById(
     "cg-canvas"
   ).style.transform = `scale(${scaleFactor})`;
@@ -287,6 +341,11 @@ document.getElementById("cg-canvas").addEventListener("mousemove", (event) => {
     // Set the position of the element
     document.getElementById("cg-canvas").style.left = `${x}px`;
     document.getElementById("cg-canvas").style.top = `${y}px`;
+    const positionData = { left: x, top: y };
+    sessionStorage.setItem(
+      `image-pos-${currentImage}`,
+      JSON.stringify(positionData)
+    );
   }
 });
 
@@ -355,8 +414,13 @@ document.getElementById("quillEditor").onkeydown = (e) => {
     quill.format("italic", isItalic);
   } else if (e.key === "Tab") {
     e.preventDefault();
-    console.log("Tabbed");
     toggleQuotes();
+  }
+};
+
+document.onkeydown = (e) => {
+  if (e.key === "Enter" && !editorEnabled) {
+    document.getElementById("text-section").classList.toggle("hide");
   }
 };
 
@@ -425,7 +489,7 @@ document.querySelector(".ql-editor").onmousemove = (e) => {
 
 quill.on("editor-change", (range) => {
   saved = false;
-  document.getElementById("save-btn").classList.remove("save-btn-disabled");
+  document.getElementById("save-btn").classList.remove("btn-disabled");
   getLastImageKeyboard();
   replaceAbbrieviations();
   fixLastLine();
@@ -447,7 +511,13 @@ function getLastLine(includeLast = false) {
   ).bottom;
   // console.log(currentLineCoord)
   for (var el of ch) {
-    if (el.innerText.includes('img:') || el.innerText.includes('aud:') || el.innerText.includes('cimg:') || el.innerText.includes('caud:')) continue;
+    if (
+      el.innerText.includes("img:") ||
+      el.innerText.includes("aud:") ||
+      el.innerText.includes("cimg:") ||
+      el.innerText.includes("caud:")
+    )
+      continue;
     if (includeLast) {
       if (el.getBoundingClientRect().bottom <= currentLineCoord) lastLine = el;
     } else {
@@ -484,13 +554,9 @@ function fixLastLine() {
       }
     }
 
-    console.log(lastLine.innerText);
-
     if ((matches = /(\.|\?|\!) [a-z]{1}/.exec(lastLine.innerText))) {
       // matches.splice(1);
-      console.log(matches);
       for (let match of matches) {
-        console.log(match);
         const replaceString = match.slice(0, 2) + match.slice(2).toUpperCase();
         lastLine.innerText = lastLine.innerText.replace(
           match,
@@ -681,7 +747,6 @@ function getLastVisibleElementContents() {
 
 function toggleQuotes() {
   const lastLine = getLastLine();
-  console.log(lastLine);
   if (!lastLine) return;
   if (
     lastLine.innerText.charAt(0) === startQuote &&
@@ -712,12 +777,13 @@ document.getElementById("save-btn").onclick = () => {
     document
       .getElementById("ql-container")
       .classList.add("ql-container-inactive");
-    document.getElementById("save-btn").classList.add("save-btn-disabled");
+    document.getElementById("save-btn").classList.add("btn-disabled");
   });
 };
 
 document.getElementById("close-btn").onclick = () => {
-  sessionStorage.removeItem("current-story");
+  // sessionStorage.removeItem("current-story");
+  sessionStorage.clear();
   window.location.href = "index.html";
 };
 
@@ -731,6 +797,39 @@ document.getElementById("mute-btn").onclick = () => {
   }
 };
 
-document.getElementById("gradient-btn").onclick = () => {
-  refreshGradient();
+// document.getElementById("gradient-btn").onclick = () => {
+//   refreshGradient();
+// };
+
+document.getElementById("center-btn").onclick = () => {
+  document.getElementById("center-btn").classList.toggle("btn-activated");
+  document
+    .getElementById("text-section")
+    .classList.toggle("text-section-centered");
+  document.getElementById("ql-container").classList.toggle("ql-container-centered");
+  resetPosition();
+  resetSize();
+  clearImageMetadata();
+};
+
+function clearImageMetadata() {
+  sessionStorage.clear();
+  sessionStorage.setItem("current-story", currentStory);
+}
+
+document.getElementById("hide-bg-icon").onclick = () => {
+  document.getElementById("hide-bg-icon").classList.toggle("btn-activated");
+  document.getElementById("dark-bg").classList.toggle("hide");
+  if (isHideBackground()) {
+    document.getElementById("text-section").style.opacity = "67%";
+    document.getElementById("opacity-slider").value = "67";
+  }
+};
+
+function isHideBackground() {
+  return !document.getElementById("dark-bg").classList.contains("hide");
+}
+
+document.getElementById("opacity-slider").onmousemove = (e) => {
+  document.getElementById("text-section").style.opacity = `${e.target.value}%`;
 };
